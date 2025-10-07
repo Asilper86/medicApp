@@ -71,6 +71,9 @@ function register(){
   alert("Registrado correctamente"); showLogin();
 }
 
+function getCurrentUser(){ const email=localStorage.getItem('currentUser'); let users=JSON.parse(localStorage.getItem('users')||'[]'); return users.find(u=>u.email===email);}
+function saveCurrentUser(user){ let users=JSON.parse(localStorage.getItem('users')||'[]'); users=users.map(u=>u.email===user.email?user:user); localStorage.setItem('users',JSON.stringify(users));}
+
 function login(){
   const email=document.getElementById('login-email').value;
   const password=document.getElementById('login-password').value;
@@ -81,23 +84,25 @@ function login(){
   document.getElementById('auth').classList.add('hidden');
   document.getElementById('dashboard').classList.remove('hidden');
   renderMeds();
+  initAlarmas(); // 🔔 Inicia notificaciones locales
 }
 
 function logout(){ localStorage.removeItem('currentUser'); document.getElementById('dashboard').classList.add('hidden'); document.getElementById('auth').classList.remove('hidden'); }
 
 // --- Medicamentos ---
-function getCurrentUser(){ const email=localStorage.getItem('currentUser'); let users=JSON.parse(localStorage.getItem('users')||'[]'); return users.find(u=>u.email===email);}
-function saveCurrentUser(user){ let users=JSON.parse(localStorage.getItem('users')||'[]'); users=users.map(u=>u.email===user.email?user:user); localStorage.setItem('users',JSON.stringify(users));}
-
 function addMed(){
   const name=document.getElementById('med-name').value;
   const dosis=document.getElementById('med-dosis').value;
   const hora=document.getElementById('med-hora').value;
   if(!name||!dosis||!hora){alert("Rellena todos los campos");return;}
   const user=getCurrentUser();
-  user.medicamentos.push({name,dosis,hora,tomado:false});
+  const med={name,dosis,hora,tomado:false};
+  user.medicamentos.push(med);
   saveCurrentUser(user); renderMeds();
-  document.getElementById('med-name').value=""; document.getElementById('med-dosis').value=""; document.getElementById('med-hora').value="";
+  programarNotificacion(med); // 🔔 Notificación al añadir
+  document.getElementById('med-name').value="";
+  document.getElementById('med-dosis').value="";
+  document.getElementById('med-hora').value="";
 }
 
 function renderMeds(){
@@ -124,12 +129,40 @@ function marcar(i){
   alert(`Bonificación actual: ${user.bonos||0} puntos`);
 }
 
-// --- Alarmas ---
+// --- Alarmas con sonido ---
 setInterval(()=>{
   const user=getCurrentUser(); if(!user) return;
   const now=new Date(); const hora=now.toTimeString().slice(0,5);
   user.medicamentos.forEach(m=>{if(!m.tomado&&m.hora===hora){new Audio('https://actions.google.com/sounds/v1/alarms/alarm_clock.ogg').play(); alert(`Hora de tomar ${m.name}!`);}});
 },60000);
+
+// --- Notificaciones push / locales ---
+if('Notification' in window){
+  Notification.requestPermission().then(permission=>{
+    if(permission==="granted"){ console.log("Permiso de notificaciones concedido"); }
+  });
+}
+
+function programarNotificacion(med){
+  if(!("Notification" in window)) return;
+  const now=new Date();
+  const [hora,min]=med.hora.split(":").map(Number);
+  let notiTime=new Date();
+  notiTime.setHours(hora,min,0,0);
+  if(notiTime<now) notiTime.setDate(notiTime.getDate()+1);
+  const timeout=notiTime-now;
+  setTimeout(()=>{
+    new Notification("Hora de tomar tu medicamento",{body:`Toma ${med.name} - ${med.dosis}`,icon:"icon-192.png"});
+    new Audio('https://actions.google.com/sounds/v1/alarms/alarm_clock.ogg').play();
+    programarNotificacion(med); // Reprogramar para el día siguiente
+  },timeout);
+}
+
+function initAlarmas(){
+  const user=getCurrentUser();
+  if(!user) return;
+  user.medicamentos.forEach(m=>{if(!m.tomado) programarNotificacion(m);});
+}
 
 // --- Escaneo de recetas ---
 function scanReceta(){document.getElementById('file-input').click();}
@@ -137,15 +170,13 @@ document.getElementById('file-input').addEventListener('change',async(e)=>{
   const file=e.target.files[0]; if(!file) return;
   const worker=Tesseract.createWorker({logger:m=>console.log(m)});
   await worker.load(); await worker.loadLanguage('spa'); await worker.initialize('spa');
-  const { data: { text } }=await worker.recognize(file);
+  const { data:{ text } }=await worker.recognize(file);
   await worker.terminate();
   const user=getCurrentUser();
   user.medicamentos.push({name:text.trim().split('\n')[0]||"Receta escaneada",dosis:"",hora:"08:00",tomado:false});
   saveCurrentUser(user); renderMeds(); alert("Receta escaneada y añadida");
 });
-</script>
 
-<script>
 // --- Service Worker para PWA ---
 if('serviceWorker' in navigator){
   navigator.serviceWorker.register('/service-worker.js').then(()=>console.log("SW registrado")).catch(e=>console.log(e));
