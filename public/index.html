@@ -4,104 +4,90 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>MedicApp</title>
+<script src="https://cdn.tailwindcss.com"></script>
 <script src="https://cdn.jsdelivr.net/npm/tesseract.js@4.1.1/dist/tesseract.min.js"></script>
 <link rel="manifest" href="manifest.json">
 <style>
-/* --- RESET & BODY --- */
-*{box-sizing:border-box;margin:0;padding:0;}
-body{font-family:'Inter',sans-serif;background:#f3f4f6;color:#111827;transition:background 0.3s,color 0.3s;}
-@media(prefers-color-scheme:dark){body{background:#1f2937;color:#f9fafb;}}
-
-/* --- INPUTS --- */
-.input-field{padding:.75rem 1rem;border-radius:1rem;border:1px solid #d1d5db;width:100%;outline:none;transition:border-color .2s;}
-.input-field:focus{border-color:#6366f1;}
-
-/* --- BOTONES --- */
-.btn-primary{background:linear-gradient(to right,#6366f1,#a78bfa);color:white;padding:.75rem 1rem;border-radius:1rem;cursor:pointer;transition:opacity .2s;}
-.btn-primary:hover{opacity:.9;}
-.btn-success{background:linear-gradient(to right,#10b981,#34d399);color:white;padding:.75rem 1rem;border-radius:1rem;cursor:pointer;transition:opacity .2s;}
-.btn-success:hover{opacity:.9;}
-.btn-danger{background:linear-gradient(to right,#ef4444,#f87171);color:white;padding:.75rem 1rem;border-radius:1rem;cursor:pointer;transition:opacity .2s;}
-.btn-danger:hover{opacity:.9;}
-.btn-warning{background:linear-gradient(to right,#f59e0b,#facc15);color:black;padding:.75rem 1rem;border-radius:1rem;cursor:pointer;transition:opacity .2s;}
-.btn-warning:hover{opacity:.9;}
-.btn-secondary{background:#9ca3af;padding:.5rem 1rem;border-radius:1rem;cursor:pointer;}
-.btn-secondary:hover{opacity:.8;}
-
-/* --- CARD --- */
-.card{display:flex;justify-content:space-between;align-items:center;padding:1rem;border-radius:1rem;background:white;box-shadow:0 3px 6px rgba(0,0,0,.1);transition:background .2s,color .2s;}
-.card.taken{background:#10b981;color:white;}
-
-/* --- MODAL --- */
-.modal{position:fixed;top:0;left:0;right:0;bottom:0;background:rgba(0,0,0,.5);display:flex;justify-content:center;align-items:center;z-index:50;}
-.modal-content{background:white;padding:2rem;border-radius:2rem;width:90%;max-width:320px;display:flex;flex-direction:column;align-items:center;gap:.5rem;}
-.modal-content img{width:120px;height:120px;border-radius:50%;object-fit:cover;}
-
-/* --- LAYOUT --- */
-#app{display:flex;flex-direction:column;align-items:center;min-height:100vh;padding:1rem;}
-#auth,#dashboard{width:100%;max-width:480px;margin-top:2rem;background:white;dark:bg-gray-800;padding:1.5rem;border-radius:2rem;box-shadow:0 3px 10px rgba(0,0,0,.1);}
-.hidden{display:none;}
+/* Modo oscuro automático */
+@media (prefers-color-scheme: dark) {
+  body { background-color: #111827; color: #f3f4f6; }
+  .card { background-color: #1f2937; color: #f3f4f6; }
+  .btn-gradient { background-image: linear-gradient(to right, #6366f1, #a78bfa); color: #fff; }
+  .btn-green { background-image: linear-gradient(to right, #10b981, #34d399); color: #fff; }
+  .btn-red { background-image: linear-gradient(to right, #ef4444, #f87171); color: #fff; }
+  .btn-yellow { background-image: linear-gradient(to right, #f59e0b, #facc15); color: #1f2937; }
+}
+body { font-family: 'Inter', sans-serif; }
 </style>
 </head>
-<body>
-<div id="app">
-  <!-- LOGIN / REGISTER -->
-  <div id="auth">
+<body class="bg-gray-100 dark:bg-gray-900 min-h-screen flex flex-col items-center">
+
+<div id="app" class="flex flex-col items-center w-full p-4">
+
+  <!-- Login / Registro -->
+  <div id="auth" class="w-full max-w-md mt-10 bg-white dark:bg-gray-800 p-6 rounded-3xl shadow-2xl">
+    <h1 class="text-4xl font-extrabold mb-6 text-center bg-clip-text text-transparent bg-gradient-to-r from-indigo-500 to-purple-500">MedicApp</h1>
+
     <div id="login-form">
-      <h1 style="text-align:center;font-size:2rem;margin-bottom:1rem;color:#6366f1;">MedicApp</h1>
-      <input id="login-email" type="email" placeholder="Email" class="input-field"><br>
-      <input id="login-password" type="password" placeholder="Contraseña" class="input-field"><br>
-      <button onclick="login()" class="btn-primary" style="width:100%;">Iniciar sesión</button>
-      <p style="text-align:center;margin-top:.5rem;">¿No tienes cuenta? <span style="color:#6366f1;cursor:pointer;" onclick="showRegister()">Regístrate</span></p>
+      <input id="login-email" type="email" placeholder="Email" class="w-full p-3 mb-4 border rounded-2xl dark:bg-gray-700 dark:text-white">
+      <input id="login-password" type="password" placeholder="Contraseña" class="w-full p-3 mb-4 border rounded-2xl dark:bg-gray-700 dark:text-white">
+      <button onclick="login()" class="w-full btn-gradient py-3 rounded-2xl text-lg font-semibold hover:opacity-90 transition">Iniciar sesión</button>
+      <p class="mt-4 text-sm text-center">¿No tienes cuenta? <span class="text-indigo-500 cursor-pointer" onclick="showRegister()">Regístrate</span></p>
     </div>
+
     <div id="register-form" class="hidden">
-      <h1 style="text-align:center;font-size:2rem;margin-bottom:1rem;color:#10b981;">Registrarse</h1>
-      <input id="reg-name" type="text" placeholder="Nombre" class="input-field"><br>
-      <input id="reg-email" type="email" placeholder="Email" class="input-field"><br>
-      <input id="reg-password" type="password" placeholder="Contraseña" class="input-field"><br>
-      <button onclick="register()" class="btn-success" style="width:100%;">Registrarse</button>
-      <p style="text-align:center;margin-top:.5rem;">¿Ya tienes cuenta? <span style="color:#6366f1;cursor:pointer;" onclick="showLogin()">Iniciar sesión</span></p>
+      <input id="reg-name" type="text" placeholder="Nombre" class="w-full p-3 mb-4 border rounded-2xl dark:bg-gray-700 dark:text-white">
+      <input id="reg-email" type="email" placeholder="Email" class="w-full p-3 mb-4 border rounded-2xl dark:bg-gray-700 dark:text-white">
+      <input id="reg-password" type="password" placeholder="Contraseña" class="w-full p-3 mb-4 border rounded-2xl dark:bg-gray-700 dark:text-white">
+      <button onclick="register()" class="w-full btn-green py-3 rounded-2xl text-lg font-semibold hover:opacity-90 transition">Registrarse</button>
+      <p class="mt-4 text-sm text-center">¿Ya tienes cuenta? <span class="text-indigo-500 cursor-pointer" onclick="showLogin()">Iniciar sesión</span></p>
     </div>
   </div>
 
-  <!-- DASHBOARD -->
-  <div id="dashboard" class="hidden">
-    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:1rem;">
-      <h2 style="font-size:1.5rem;font-weight:bold;">Tus Medicamentos</h2>
-      <div style="display:flex;gap:.5rem;">
-        <button onclick="openUserMenu()" class="btn-secondary">Perfil</button>
-        <button onclick="logout()" class="btn-danger">Cerrar sesión</button>
+  <!-- Dashboard -->
+  <div id="dashboard" class="hidden w-full max-w-4xl mt-6 flex flex-col gap-4">
+
+    <div class="flex justify-between items-center mb-4">
+      <h2 class="text-2xl font-bold">Tus Medicamentos</h2>
+      <div class="flex gap-2">
+        <button onclick="openUserMenu()" class="px-3 py-2 rounded-2xl bg-gray-300 dark:bg-gray-700 hover:opacity-90 transition">Perfil</button>
+        <button onclick="logout()" class="btn-red px-3 py-2 rounded-2xl hover:opacity-90 transition">Cerrar sesión</button>
       </div>
     </div>
 
-    <div style="display:flex;flex-wrap:wrap;gap:.5rem;margin-bottom:1rem;">
-      <input id="med-name" type="text" placeholder="Medicamento" class="input-field" style="flex:2;">
-      <input id="med-dosis" type="text" placeholder="Dosis" class="input-field" style="flex:1;">
-      <input id="med-hora" type="time" class="input-field" style="flex:1;">
-      <button onclick="addMed()" class="btn-primary">Añadir</button>
-      <button onclick="scanReceta()" class="btn-warning">Escanear</button>
+    <!-- Formulario añadir medicamento -->
+    <div class="bg-white dark:bg-gray-700 p-4 rounded-3xl shadow-xl flex flex-col md:flex-row gap-3 items-center">
+      <input id="med-name" type="text" placeholder="Nombre del medicamento" class="flex-1 p-3 border rounded-2xl dark:bg-gray-600 dark:text-white">
+      <input id="med-dosis" type="text" placeholder="Dosis" class="w-24 p-3 border rounded-2xl dark:bg-gray-600 dark:text-white">
+      <input id="med-hora" type="time" class="w-24 p-3 border rounded-2xl dark:bg-gray-600 dark:text-white">
+      <button onclick="addMed()" class="btn-gradient px-4 py-3 rounded-2xl hover:opacity-90 transition">Añadir</button>
+      <button onclick="scanReceta()" class="btn-yellow px-4 py-3 rounded-2xl hover:opacity-90 transition">Escanear</button>
     </div>
 
-    <div id="med-list" style="display:flex;flex-direction:column;gap:.5rem;margin-bottom:1rem;"></div>
+    <!-- Lista de medicamentos -->
+    <div id="med-list" class="grid grid-cols-1 gap-4"></div>
 
-    <div style="background:#f9fafb;padding:1rem;border-radius:1rem;">
-      <h3 style="font-weight:bold;margin-bottom:.5rem;">Ranking Semanal</h3>
-      <div id="ranking"></div>
+    <!-- Ranking semanal -->
+    <div class="mt-6">
+      <h3 class="font-bold text-xl mb-2">Ranking Semanal</h3>
+      <div id="ranking" class="bg-gray-100 dark:bg-gray-800 p-4 rounded-2xl shadow-inner"></div>
     </div>
   </div>
 </div>
 
-<!-- USER MODAL -->
-<div id="user-menu" class="modal hidden">
-  <div class="modal-content">
-    <h3 style="font-weight:bold;font-size:1.5rem;margin-bottom:.5rem;">Perfil</h3>
-    <img id="profile-pic" src="" alt="Foto">
-    <input type="file" id="profile-input">
-    <input id="profile-name" type="text" placeholder="Nombre" class="input-field">
-    <input id="profile-email" type="email" placeholder="Email" class="input-field" disabled>
-    <input id="profile-password" type="password" placeholder="Nueva contraseña" class="input-field">
-    <button onclick="saveProfile()" class="btn-success" style="width:100%;">Guardar</button>
-    <button onclick="closeUserMenu()" class="btn-secondary" style="width:100%;">Cerrar</button>
+<!-- Menú de usuario modal -->
+<div id="user-menu" class="fixed inset-0 bg-black bg-opacity-50 hidden justify-center items-center z-50">
+  <div class="bg-white dark:bg-gray-800 p-6 rounded-3xl w-80 flex flex-col gap-4 shadow-2xl animate-slide-in-right">
+    <h3 class="font-bold text-2xl mb-2 text-center">Perfil</h3>
+    <div class="flex flex-col items-center gap-2">
+      <img id="profile-pic" src="" alt="Foto" class="w-24 h-24 rounded-full bg-gray-200">
+      <input type="file" id="profile-input" class="mb-2">
+      <input type="text" id="profile-name" placeholder="Nombre" class="w-full p-2 border rounded-2xl dark:bg-gray-700 dark:text-white">
+      <input type="email" id="profile-email" placeholder="Email" class="w-full p-2 border rounded-2xl dark:bg-gray-700 dark:text-white" disabled>
+      <input type="password" id="profile-password" placeholder="Nueva contraseña" class="w-full p-2 border rounded-2xl dark:bg-gray-700 dark:text-white">
+      <button onclick="saveProfile()" class="btn-green w-full py-2 rounded-2xl hover:opacity-90 transition">Guardar</button>
+      <button onclick="closeUserMenu()" class="w-full py-2 rounded-2xl bg-gray-300 dark:bg-gray-700 hover:opacity-90 transition">Cerrar</button>
+    </div>
   </div>
 </div>
 
