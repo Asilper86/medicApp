@@ -3,8 +3,10 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>MedicApp - Gestión de Medicamentos</title>
+<title>MedicApp</title>
 <script src="https://cdn.tailwindcss.com"></script>
+<script src="https://cdn.jsdelivr.net/npm/tesseract.js@4.1.1/dist/tesseract.min.js"></script>
+<link rel="manifest" href="manifest.json">
 </head>
 <body class="bg-gray-100 text-gray-800">
 
@@ -37,17 +39,20 @@
       <button onclick="logout()" class="bg-red-500 text-white px-4 py-2 rounded hover:bg-red-600">Cerrar sesión</button>
     </div>
     
-    <div class="mb-4">
-      <input id="med-name" type="text" placeholder="Nombre del medicamento" class="p-2 border rounded mr-2">
-      <input id="med-dosis" type="text" placeholder="Dosis" class="p-2 border rounded mr-2">
-      <input id="med-hora" type="time" class="p-2 border rounded mr-2">
+    <div class="mb-4 flex flex-wrap gap-2">
+      <input id="med-name" type="text" placeholder="Nombre del medicamento" class="p-2 border rounded">
+      <input id="med-dosis" type="text" placeholder="Dosis" class="p-2 border rounded">
+      <input id="med-hora" type="time" class="p-2 border rounded">
       <button onclick="addMed()" class="bg-indigo-600 text-white px-3 py-2 rounded hover:bg-indigo-700">Añadir</button>
+      <button onclick="scanReceta()" class="bg-yellow-500 text-white px-3 py-2 rounded hover:bg-yellow-600">Escanear receta</button>
     </div>
 
     <div id="med-list" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4"></div>
   </div>
 
 </div>
+
+<input type="file" id="file-input" accept="image/*" capture="environment" class="hidden">
 
 <script>
 // --- Manejo de usuarios ---
@@ -154,7 +159,7 @@ function marcar(i){
   alert(`Bonificación actual: ${user.bonos || 0} puntos`);
 }
 
-// --- Alarma simple ---
+// --- Alarmas ---
 setInterval(()=>{
   const user = getCurrentUser();
   if(!user) return;
@@ -168,6 +173,32 @@ setInterval(()=>{
   });
 },60000);
 
+// --- Escaneo de recetas ---
+function scanReceta(){
+  document.getElementById('file-input').click();
+}
+
+document.getElementById('file-input').addEventListener('change', async (e)=>{
+  const file = e.target.files[0];
+  if(!file) return;
+
+  const worker = Tesseract.createWorker({
+    logger: m => console.log(m)
+  });
+  await worker.load();
+  await worker.loadLanguage('spa');
+  await worker.initialize('spa');
+
+  const { data: { text } } = await worker.recognize(file);
+  await worker.terminate();
+
+  // Añadimos el texto como medicamento automáticamente
+  const user = getCurrentUser();
+  user.medicamentos.push({name:text.trim().split('\n')[0] || "Receta escaneada", dosis:"", hora:"08:00", tomado:false});
+  saveCurrentUser(user);
+  renderMeds();
+  alert("Receta escaneada y añadida");
+});
 </script>
 </body>
 </html>
