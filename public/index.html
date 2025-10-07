@@ -8,82 +8,84 @@
 <script src="https://cdn.jsdelivr.net/npm/tesseract.js@4.1.1/dist/tesseract.min.js"></script>
 <link rel="manifest" href="manifest.json">
 <style>
-/* Tema oscuro automático */
+/* Modo oscuro automático */
 @media (prefers-color-scheme: dark) {
   body { background-color: #1f2937; color: #f3f4f6; }
   .card { background-color: #374151; color: #f3f4f6; }
-  .btn-indigo { background-color: #6366f1; color: #f3f4f6; }
-  .btn-green { background-color: #10b981; color: #f3f4f6; }
-  .btn-red { background-color: #ef4444; color: #f3f4f6; }
-  .btn-yellow { background-color: #f59e0b; color: #1f2937; }
+  .btn-gradient { background-image: linear-gradient(to right, #6366f1, #a78bfa); color: #fff; }
+  .btn-green { background-image: linear-gradient(to right, #10b981, #34d399); color: #fff; }
+  .btn-red { background-image: linear-gradient(to right, #ef4444, #f87171); color: #fff; }
+  .btn-yellow { background-image: linear-gradient(to right, #f59e0b, #facc15); color: #1f2937; }
 }
 </style>
 </head>
-<body class="bg-gray-100 text-gray-800 min-h-screen">
+<body class="bg-gray-100 text-gray-800 font-sans min-h-screen">
 
 <div id="app" class="flex flex-col items-center p-4">
 
   <!-- Login / Registro -->
-  <div id="auth" class="w-full max-w-md mt-10 bg-white p-6 rounded-xl shadow-lg">
-    <h1 class="text-2xl font-bold mb-4 text-center">MedicApp</h1>
+  <div id="auth" class="w-full max-w-md mt-10 bg-white dark:bg-gray-800 p-6 rounded-2xl shadow-xl">
+    <h1 class="text-3xl font-bold mb-6 text-center bg-clip-text text-transparent bg-gradient-to-r from-indigo-500 to-purple-500">MedicApp</h1>
 
     <div id="login-form">
-      <input id="login-email" type="email" placeholder="Email" class="w-full p-2 mb-3 border rounded">
-      <input id="login-password" type="password" placeholder="Contraseña" class="w-full p-2 mb-3 border rounded">
-      <button onclick="login()" class="w-full btn-indigo py-2 rounded hover:opacity-90">Iniciar sesión</button>
-      <p class="mt-3 text-sm text-center">¿No tienes cuenta? <span class="text-indigo-600 cursor-pointer" onclick="showRegister()">Regístrate</span></p>
+      <input id="login-email" type="email" placeholder="Email" class="w-full p-3 mb-4 border rounded-xl dark:bg-gray-700 dark:text-white">
+      <input id="login-password" type="password" placeholder="Contraseña" class="w-full p-3 mb-4 border rounded-xl dark:bg-gray-700 dark:text-white">
+      <button onclick="login()" class="w-full btn-gradient py-3 rounded-xl text-lg hover:opacity-90 transition">Iniciar sesión</button>
+      <p class="mt-4 text-sm text-center">¿No tienes cuenta? <span class="text-indigo-500 cursor-pointer" onclick="showRegister()">Regístrate</span></p>
     </div>
 
     <div id="register-form" class="hidden">
-      <input id="reg-name" type="text" placeholder="Nombre" class="w-full p-2 mb-3 border rounded">
-      <input id="reg-email" type="email" placeholder="Email" class="w-full p-2 mb-3 border rounded">
-      <input id="reg-password" type="password" placeholder="Contraseña" class="w-full p-2 mb-3 border rounded">
-      <button onclick="register()" class="w-full btn-green py-2 rounded hover:opacity-90">Registrarse</button>
-      <p class="mt-3 text-sm text-center">¿Ya tienes cuenta? <span class="text-indigo-600 cursor-pointer" onclick="showLogin()">Iniciar sesión</span></p>
+      <input id="reg-name" type="text" placeholder="Nombre" class="w-full p-3 mb-4 border rounded-xl dark:bg-gray-700 dark:text-white">
+      <input id="reg-email" type="email" placeholder="Email" class="w-full p-3 mb-4 border rounded-xl dark:bg-gray-700 dark:text-white">
+      <input id="reg-password" type="password" placeholder="Contraseña" class="w-full p-3 mb-4 border rounded-xl dark:bg-gray-700 dark:text-white">
+      <button onclick="register()" class="w-full btn-green py-3 rounded-xl text-lg hover:opacity-90 transition">Registrarse</button>
+      <p class="mt-4 text-sm text-center">¿Ya tienes cuenta? <span class="text-indigo-500 cursor-pointer" onclick="showLogin()">Iniciar sesión</span></p>
     </div>
   </div>
 
   <!-- Dashboard -->
-  <div id="dashboard" class="hidden w-full max-w-4xl mt-6">
+  <div id="dashboard" class="hidden w-full max-w-4xl mt-6 flex flex-col gap-4">
 
     <div class="flex justify-between items-center mb-4">
-      <h2 class="text-xl font-bold">Tus Medicamentos</h2>
+      <h2 class="text-2xl font-bold">Tus Medicamentos</h2>
       <div class="flex gap-2">
-        <button onclick="openUserMenu()" class="bg-gray-300 dark:bg-gray-700 px-3 py-1 rounded">Perfil</button>
-        <button onclick="logout()" class="btn-red px-3 py-1 rounded hover:opacity-90">Cerrar sesión</button>
+        <button onclick="openUserMenu()" class="px-3 py-2 rounded-xl bg-gray-300 dark:bg-gray-700 hover:opacity-90 transition">Perfil</button>
+        <button onclick="logout()" class="btn-red px-3 py-2 rounded-xl hover:opacity-90 transition">Cerrar sesión</button>
       </div>
     </div>
 
-    <div class="mb-4 flex flex-wrap gap-2">
-      <input id="med-name" type="text" placeholder="Nombre del medicamento" class="p-2 border rounded flex-1">
-      <input id="med-dosis" type="text" placeholder="Dosis" class="p-2 border rounded w-24">
-      <input id="med-hora" type="time" class="p-2 border rounded w-24">
-      <button onclick="addMed()" class="btn-indigo px-3 py-2 rounded hover:opacity-90">Añadir</button>
-      <button onclick="scanReceta()" class="btn-yellow px-3 py-2 rounded hover:opacity-90">Escanear receta</button>
+    <!-- Formulario añadir medicamento -->
+    <div class="bg-white dark:bg-gray-700 p-4 rounded-2xl shadow-lg flex flex-col md:flex-row gap-3 items-center">
+      <input id="med-name" type="text" placeholder="Nombre del medicamento" class="flex-1 p-3 border rounded-xl dark:bg-gray-600 dark:text-white">
+      <input id="med-dosis" type="text" placeholder="Dosis" class="w-24 p-3 border rounded-xl dark:bg-gray-600 dark:text-white">
+      <input id="med-hora" type="time" class="w-24 p-3 border rounded-xl dark:bg-gray-600 dark:text-white">
+      <button onclick="addMed()" class="btn-gradient px-4 py-3 rounded-xl hover:opacity-90 transition">Añadir</button>
+      <button onclick="scanReceta()" class="btn-yellow px-4 py-3 rounded-xl hover:opacity-90 transition">Escanear</button>
     </div>
 
+    <!-- Lista de medicamentos -->
     <div id="med-list" class="grid grid-cols-1 gap-4"></div>
 
+    <!-- Ranking semanal -->
     <div class="mt-6">
-      <h3 class="font-bold text-lg mb-2">Ranking Semanal</h3>
-      <div id="ranking" class="bg-white dark:bg-gray-700 p-4 rounded shadow"></div>
+      <h3 class="font-bold text-xl mb-2">Ranking Semanal</h3>
+      <div id="ranking" class="bg-gray-100 dark:bg-gray-800 p-4 rounded-2xl shadow-inner"></div>
     </div>
   </div>
-
 </div>
 
 <!-- Menú de usuario modal -->
-<div id="user-menu" class="fixed inset-0 bg-black bg-opacity-50 hidden justify-center items-center">
-  <div class="bg-white dark:bg-gray-800 p-6 rounded-xl w-80">
-    <h3 class="font-bold text-lg mb-4">Perfil</h3>
-    <div class="mb-3 flex flex-col items-center">
-      <img id="profile-pic" src="" alt="Foto" class="w-20 h-20 rounded-full mb-2 bg-gray-200">
+<div id="user-menu" class="fixed inset-0 bg-black bg-opacity-50 hidden justify-center items-center z-50">
+  <div class="bg-white dark:bg-gray-800 p-6 rounded-2xl w-80 flex flex-col gap-4 shadow-2xl">
+    <h3 class="font-bold text-2xl mb-2 text-center">Perfil</h3>
+    <div class="flex flex-col items-center gap-2">
+      <img id="profile-pic" src="" alt="Foto" class="w-24 h-24 rounded-full bg-gray-200">
       <input type="file" id="profile-input" class="mb-2">
-      <input type="text" id="profile-name" placeholder="Nombre" class="w-full p-2 mb-2 border rounded">
-      <input type="email" id="profile-email" placeholder="Email" class="w-full p-2 mb-2 border rounded" disabled>
-      <input type="password" id="profile-password" placeholder="Nueva contraseña" class="w-full p-2 mb-2 border rounded">
-      <button onclick="saveProfile()" class="btn-green w-full py-2 rounded hover:opacity-90">Guardar</button>
-      <button onclick="closeUserMenu()" class="w-full py-2 mt-2 rounded bg-gray-300 dark:bg-gray-700 hover:opacity-90">Cerrar</button>
+      <input type="text" id="profile-name" placeholder="Nombre" class="w-full p-2 border rounded-xl dark:bg-gray-700 dark:text-white">
+      <input type="email" id="profile-email" placeholder="Email" class="w-full p-2 border rounded-xl dark:bg-gray-700 dark:text-white" disabled>
+      <input type="password" id="profile-password" placeholder="Nueva contraseña" class="w-full p-2 border rounded-xl dark:bg-gray-700 dark:text-white">
+      <button onclick="saveProfile()" class="btn-green w-full py-2 rounded-xl hover:opacity-90 transition">Guardar</button>
+      <button onclick="closeUserMenu()" class="w-full py-2 rounded-xl bg-gray-300 dark:bg-gray-700 hover:opacity-90 transition">Cerrar</button>
     </div>
   </div>
 </div>
