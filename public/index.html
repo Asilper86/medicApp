@@ -1,0 +1,173 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>MedicApp - Gestión de Medicamentos</title>
+<script src="https://cdn.tailwindcss.com"></script>
+</head>
+<body class="bg-gray-100 text-gray-800">
+
+<div id="app" class="min-h-screen flex flex-col items-center justify-start p-4">
+
+  <!-- Login y Registro -->
+  <div id="auth" class="w-full max-w-md mt-10 bg-white p-6 rounded-xl shadow-lg">
+    <h1 class="text-2xl font-bold mb-4 text-center">MedicApp</h1>
+    
+    <div id="login-form">
+      <input id="login-email" type="email" placeholder="Email" class="w-full p-2 mb-3 border rounded">
+      <input id="login-password" type="password" placeholder="Contraseña" class="w-full p-2 mb-3 border rounded">
+      <button onclick="login()" class="w-full bg-indigo-600 text-white py-2 rounded hover:bg-indigo-700">Iniciar sesión</button>
+      <p class="mt-3 text-sm text-center">¿No tienes cuenta? <span class="text-indigo-600 cursor-pointer" onclick="showRegister()">Regístrate</span></p>
+    </div>
+
+    <div id="register-form" class="hidden">
+      <input id="reg-name" type="text" placeholder="Nombre" class="w-full p-2 mb-3 border rounded">
+      <input id="reg-email" type="email" placeholder="Email" class="w-full p-2 mb-3 border rounded">
+      <input id="reg-password" type="password" placeholder="Contraseña" class="w-full p-2 mb-3 border rounded">
+      <button onclick="register()" class="w-full bg-green-600 text-white py-2 rounded hover:bg-green-700">Registrarse</button>
+      <p class="mt-3 text-sm text-center">¿Ya tienes cuenta? <span class="text-indigo-600 cursor-pointer" onclick="showLogin()">Iniciar sesión</span></p>
+    </div>
+  </div>
+
+  <!-- Dashboard -->
+  <div id="dashboard" class="hidden w-full max-w-4xl mt-6">
+    <div class="flex justify-between items-center mb-4">
+      <h2 class="text-xl font-bold">Tus Medicamentos</h2>
+      <button onclick="logout()" class="bg-red-500 text-white px-4 py-2 rounded hover:bg-red-600">Cerrar sesión</button>
+    </div>
+    
+    <div class="mb-4">
+      <input id="med-name" type="text" placeholder="Nombre del medicamento" class="p-2 border rounded mr-2">
+      <input id="med-dosis" type="text" placeholder="Dosis" class="p-2 border rounded mr-2">
+      <input id="med-hora" type="time" class="p-2 border rounded mr-2">
+      <button onclick="addMed()" class="bg-indigo-600 text-white px-3 py-2 rounded hover:bg-indigo-700">Añadir</button>
+    </div>
+
+    <div id="med-list" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4"></div>
+  </div>
+
+</div>
+
+<script>
+// --- Manejo de usuarios ---
+function showRegister(){
+  document.getElementById('login-form').classList.add('hidden');
+  document.getElementById('register-form').classList.remove('hidden');
+}
+function showLogin(){
+  document.getElementById('register-form').classList.add('hidden');
+  document.getElementById('login-form').classList.remove('hidden');
+}
+
+function register(){
+  const name = document.getElementById('reg-name').value;
+  const email = document.getElementById('reg-email').value;
+  const password = document.getElementById('reg-password').value;
+
+  if(!name || !email || !password){ alert("Rellena todos los campos"); return; }
+
+  let users = JSON.parse(localStorage.getItem('users') || '[]');
+  if(users.find(u => u.email === email)){ alert("Usuario ya registrado"); return; }
+
+  users.push({name,email,password,bonos:0,medicamentos:[]});
+  localStorage.setItem('users', JSON.stringify(users));
+  alert("Registrado correctamente");
+  showLogin();
+}
+
+function login(){
+  const email = document.getElementById('login-email').value;
+  const password = document.getElementById('login-password').value;
+
+  let users = JSON.parse(localStorage.getItem('users') || '[]');
+  const user = users.find(u => u.email === email && u.password === password);
+  if(!user){ alert("Usuario o contraseña incorrecta"); return; }
+
+  localStorage.setItem('currentUser', email);
+  document.getElementById('auth').classList.add('hidden');
+  document.getElementById('dashboard').classList.remove('hidden');
+  renderMeds();
+}
+
+function logout(){
+  localStorage.removeItem('currentUser');
+  document.getElementById('dashboard').classList.add('hidden');
+  document.getElementById('auth').classList.remove('hidden');
+}
+
+// --- Medicamentos ---
+function getCurrentUser(){
+  const email = localStorage.getItem('currentUser');
+  let users = JSON.parse(localStorage.getItem('users') || '[]');
+  return users.find(u => u.email === email);
+}
+
+function saveCurrentUser(user){
+  let users = JSON.parse(localStorage.getItem('users') || '[]');
+  users = users.map(u => u.email === user.email ? user : u);
+  localStorage.setItem('users', JSON.stringify(users));
+}
+
+function addMed(){
+  const name = document.getElementById('med-name').value;
+  const dosis = document.getElementById('med-dosis').value;
+  const hora = document.getElementById('med-hora').value;
+
+  if(!name || !dosis || !hora){ alert("Rellena todos los campos"); return; }
+
+  const user = getCurrentUser();
+  user.medicamentos.push({name,dosis,hora,tomado:false});
+  saveCurrentUser(user);
+  renderMeds();
+
+  document.getElementById('med-name').value="";
+  document.getElementById('med-dosis').value="";
+  document.getElementById('med-hora').value="";
+}
+
+function renderMeds(){
+  const medList = document.getElementById('med-list');
+  const user = getCurrentUser();
+  medList.innerHTML = "";
+
+  user.medicamentos.forEach((med,i)=>{
+    const card = document.createElement('div');
+    card.className="bg-white p-4 rounded shadow flex flex-col justify-between";
+    card.innerHTML = `
+      <h3 class="font-bold text-lg">${med.name}</h3>
+      <p>Dosis: ${med.dosis}</p>
+      <p>Hora: ${med.hora}</p>
+      <p>Tomado: <span class="font-semibold">${med.tomado ? "Sí" : "No"}</span></p>
+      <button onclick="marcar(${i})" class="mt-2 bg-green-600 text-white px-3 py-1 rounded hover:bg-green-700">${med.tomado ? "Desmarcar" : "Marcar como tomado"}</button>
+    `;
+    medList.appendChild(card);
+  });
+}
+
+function marcar(i){
+  const user = getCurrentUser();
+  user.medicamentos[i].tomado = !user.medicamentos[i].tomado;
+  if(user.medicamentos[i].tomado) user.bonos = (user.bonos || 0) + 1;
+  saveCurrentUser(user);
+  renderMeds();
+  alert(`Bonificación actual: ${user.bonos || 0} puntos`);
+}
+
+// --- Alarma simple ---
+setInterval(()=>{
+  const user = getCurrentUser();
+  if(!user) return;
+  const now = new Date();
+  const hora = now.toTimeString().slice(0,5);
+  user.medicamentos.forEach(m=>{
+    if(!m.tomado && m.hora === hora){
+      new Audio('https://actions.google.com/sounds/v1/alarms/alarm_clock.ogg').play();
+      alert(`Hora de tomar ${m.name}!`);
+    }
+  });
+},60000);
+
+</script>
+</body>
+</html>
