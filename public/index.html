@@ -56,149 +56,101 @@
 
 <script>
 // --- Manejo de usuarios ---
-function showRegister(){
-  document.getElementById('login-form').classList.add('hidden');
-  document.getElementById('register-form').classList.remove('hidden');
-}
-function showLogin(){
-  document.getElementById('register-form').classList.add('hidden');
-  document.getElementById('login-form').classList.remove('hidden');
-}
+function showRegister(){ document.getElementById('login-form').classList.add('hidden'); document.getElementById('register-form').classList.remove('hidden'); }
+function showLogin(){ document.getElementById('register-form').classList.add('hidden'); document.getElementById('login-form').classList.remove('hidden'); }
 
 function register(){
-  const name = document.getElementById('reg-name').value;
-  const email = document.getElementById('reg-email').value;
-  const password = document.getElementById('reg-password').value;
-
-  if(!name || !email || !password){ alert("Rellena todos los campos"); return; }
-
-  let users = JSON.parse(localStorage.getItem('users') || '[]');
-  if(users.find(u => u.email === email)){ alert("Usuario ya registrado"); return; }
-
+  const name=document.getElementById('reg-name').value;
+  const email=document.getElementById('reg-email').value;
+  const password=document.getElementById('reg-password').value;
+  if(!name||!email||!password){alert("Rellena todos los campos");return;}
+  let users=JSON.parse(localStorage.getItem('users')||'[]');
+  if(users.find(u=>u.email===email)){alert("Usuario ya registrado");return;}
   users.push({name,email,password,bonos:0,medicamentos:[]});
-  localStorage.setItem('users', JSON.stringify(users));
-  alert("Registrado correctamente");
-  showLogin();
+  localStorage.setItem('users',JSON.stringify(users));
+  alert("Registrado correctamente"); showLogin();
 }
 
 function login(){
-  const email = document.getElementById('login-email').value;
-  const password = document.getElementById('login-password').value;
-
-  let users = JSON.parse(localStorage.getItem('users') || '[]');
-  const user = users.find(u => u.email === email && u.password === password);
-  if(!user){ alert("Usuario o contraseña incorrecta"); return; }
-
-  localStorage.setItem('currentUser', email);
+  const email=document.getElementById('login-email').value;
+  const password=document.getElementById('login-password').value;
+  let users=JSON.parse(localStorage.getItem('users')||'[]');
+  const user=users.find(u=>u.email===email&&u.password===password);
+  if(!user){alert("Usuario o contraseña incorrecta");return;}
+  localStorage.setItem('currentUser',email);
   document.getElementById('auth').classList.add('hidden');
   document.getElementById('dashboard').classList.remove('hidden');
   renderMeds();
 }
 
-function logout(){
-  localStorage.removeItem('currentUser');
-  document.getElementById('dashboard').classList.add('hidden');
-  document.getElementById('auth').classList.remove('hidden');
-}
+function logout(){ localStorage.removeItem('currentUser'); document.getElementById('dashboard').classList.add('hidden'); document.getElementById('auth').classList.remove('hidden'); }
 
 // --- Medicamentos ---
-function getCurrentUser(){
-  const email = localStorage.getItem('currentUser');
-  let users = JSON.parse(localStorage.getItem('users') || '[]');
-  return users.find(u => u.email === email);
-}
-
-function saveCurrentUser(user){
-  let users = JSON.parse(localStorage.getItem('users') || '[]');
-  users = users.map(u => u.email === user.email ? user : u);
-  localStorage.setItem('users', JSON.stringify(users));
-}
+function getCurrentUser(){ const email=localStorage.getItem('currentUser'); let users=JSON.parse(localStorage.getItem('users')||'[]'); return users.find(u=>u.email===email);}
+function saveCurrentUser(user){ let users=JSON.parse(localStorage.getItem('users')||'[]'); users=users.map(u=>u.email===user.email?user:user); localStorage.setItem('users',JSON.stringify(users));}
 
 function addMed(){
-  const name = document.getElementById('med-name').value;
-  const dosis = document.getElementById('med-dosis').value;
-  const hora = document.getElementById('med-hora').value;
-
-  if(!name || !dosis || !hora){ alert("Rellena todos los campos"); return; }
-
-  const user = getCurrentUser();
+  const name=document.getElementById('med-name').value;
+  const dosis=document.getElementById('med-dosis').value;
+  const hora=document.getElementById('med-hora').value;
+  if(!name||!dosis||!hora){alert("Rellena todos los campos");return;}
+  const user=getCurrentUser();
   user.medicamentos.push({name,dosis,hora,tomado:false});
-  saveCurrentUser(user);
-  renderMeds();
-
-  document.getElementById('med-name').value="";
-  document.getElementById('med-dosis').value="";
-  document.getElementById('med-hora').value="";
+  saveCurrentUser(user); renderMeds();
+  document.getElementById('med-name').value=""; document.getElementById('med-dosis').value=""; document.getElementById('med-hora').value="";
 }
 
 function renderMeds(){
-  const medList = document.getElementById('med-list');
-  const user = getCurrentUser();
-  medList.innerHTML = "";
-
+  const medList=document.getElementById('med-list');
+  const user=getCurrentUser();
+  medList.innerHTML="";
   user.medicamentos.forEach((med,i)=>{
-    const card = document.createElement('div');
+    const card=document.createElement('div');
     card.className="bg-white p-4 rounded shadow flex flex-col justify-between";
-    card.innerHTML = `
-      <h3 class="font-bold text-lg">${med.name}</h3>
+    card.innerHTML=`<h3 class="font-bold text-lg">${med.name}</h3>
       <p>Dosis: ${med.dosis}</p>
       <p>Hora: ${med.hora}</p>
-      <p>Tomado: <span class="font-semibold">${med.tomado ? "Sí" : "No"}</span></p>
-      <button onclick="marcar(${i})" class="mt-2 bg-green-600 text-white px-3 py-1 rounded hover:bg-green-700">${med.tomado ? "Desmarcar" : "Marcar como tomado"}</button>
-    `;
+      <p>Tomado: <span class="font-semibold">${med.tomado?"Sí":"No"}</span></p>
+      <button onclick="marcar(${i})" class="mt-2 bg-green-600 text-white px-3 py-1 rounded hover:bg-green-700">${med.tomado?"Desmarcar":"Marcar como tomado"}</button>`;
     medList.appendChild(card);
   });
 }
 
 function marcar(i){
-  const user = getCurrentUser();
-  user.medicamentos[i].tomado = !user.medicamentos[i].tomado;
-  if(user.medicamentos[i].tomado) user.bonos = (user.bonos || 0) + 1;
-  saveCurrentUser(user);
-  renderMeds();
-  alert(`Bonificación actual: ${user.bonos || 0} puntos`);
+  const user=getCurrentUser();
+  user.medicamentos[i].tomado=!user.medicamentos[i].tomado;
+  if(user.medicamentos[i].tomado) user.bonos=(user.bonos||0)+1;
+  saveCurrentUser(user); renderMeds();
+  alert(`Bonificación actual: ${user.bonos||0} puntos`);
 }
 
 // --- Alarmas ---
 setInterval(()=>{
-  const user = getCurrentUser();
-  if(!user) return;
-  const now = new Date();
-  const hora = now.toTimeString().slice(0,5);
-  user.medicamentos.forEach(m=>{
-    if(!m.tomado && m.hora === hora){
-      new Audio('https://actions.google.com/sounds/v1/alarms/alarm_clock.ogg').play();
-      alert(`Hora de tomar ${m.name}!`);
-    }
-  });
+  const user=getCurrentUser(); if(!user) return;
+  const now=new Date(); const hora=now.toTimeString().slice(0,5);
+  user.medicamentos.forEach(m=>{if(!m.tomado&&m.hora===hora){new Audio('https://actions.google.com/sounds/v1/alarms/alarm_clock.ogg').play(); alert(`Hora de tomar ${m.name}!`);}});
 },60000);
 
 // --- Escaneo de recetas ---
-function scanReceta(){
-  document.getElementById('file-input').click();
-}
-
-document.getElementById('file-input').addEventListener('change', async (e)=>{
-  const file = e.target.files[0];
-  if(!file) return;
-
-  const worker = Tesseract.createWorker({
-    logger: m => console.log(m)
-  });
-  await worker.load();
-  await worker.loadLanguage('spa');
-  await worker.initialize('spa');
-
-  const { data: { text } } = await worker.recognize(file);
+function scanReceta(){document.getElementById('file-input').click();}
+document.getElementById('file-input').addEventListener('change',async(e)=>{
+  const file=e.target.files[0]; if(!file) return;
+  const worker=Tesseract.createWorker({logger:m=>console.log(m)});
+  await worker.load(); await worker.loadLanguage('spa'); await worker.initialize('spa');
+  const { data: { text } }=await worker.recognize(file);
   await worker.terminate();
-
-  // Añadimos el texto como medicamento automáticamente
-  const user = getCurrentUser();
-  user.medicamentos.push({name:text.trim().split('\n')[0] || "Receta escaneada", dosis:"", hora:"08:00", tomado:false});
-  saveCurrentUser(user);
-  renderMeds();
-  alert("Receta escaneada y añadida");
+  const user=getCurrentUser();
+  user.medicamentos.push({name:text.trim().split('\n')[0]||"Receta escaneada",dosis:"",hora:"08:00",tomado:false});
+  saveCurrentUser(user); renderMeds(); alert("Receta escaneada y añadida");
 });
 </script>
+
+<script>
+// --- Service Worker para PWA ---
+if('serviceWorker' in navigator){
+  navigator.serviceWorker.register('/service-worker.js').then(()=>console.log("SW registrado")).catch(e=>console.log(e));
+}
+</script>
+
 </body>
 </html>
