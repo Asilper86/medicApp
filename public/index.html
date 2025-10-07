@@ -8,75 +8,72 @@
 <script src="https://cdn.jsdelivr.net/npm/tesseract.js@4.1.1/dist/tesseract.min.js"></script>
 <link rel="manifest" href="manifest.json">
 </head>
-<body>
-<div id="app" class="app-container">
+<body class="bg-gray-100 dark:bg-gray-900 text-gray-900 dark:text-gray-100">
 
-  <!-- Login / Registro -->
-  <div id="auth" class="auth-container">
-    <h1>MedicApp</h1>
+<div id="app" class="flex flex-col items-center min-h-screen p-4">
 
-    <div id="login-form">
-      <input id="login-email" type="email" placeholder="Email">
-      <input id="login-password" type="password" placeholder="Contraseña">
-      <button onclick="login()">Iniciar sesión</button>
-      <p>¿No tienes cuenta? <span onclick="showRegister()">Regístrate</span></p>
+  <!-- Auth -->
+  <div id="auth" class="w-full max-w-md mt-10 bg-white dark:bg-gray-800 p-6 rounded-3xl shadow-xl">
+    <h1 class="text-4xl font-extrabold mb-6 text-center text-indigo-600 dark:text-indigo-400">MedicApp</h1>
+    <div id="login-form" class="flex flex-col gap-4">
+      <input id="login-email" type="email" placeholder="Email" class="input-field">
+      <input id="login-password" type="password" placeholder="Contraseña" class="input-field">
+      <button onclick="login()" class="btn-primary">Iniciar sesión</button>
+      <p class="text-sm text-center">¿No tienes cuenta? <span class="text-indigo-500 cursor-pointer" onclick="showRegister()">Regístrate</span></p>
     </div>
 
-    <div id="register-form" class="hidden">
-      <input id="reg-name" type="text" placeholder="Nombre">
-      <input id="reg-email" type="email" placeholder="Email">
-      <input id="reg-password" type="password" placeholder="Contraseña">
-      <button onclick="register()">Registrarse</button>
-      <p>¿Ya tienes cuenta? <span onclick="showLogin()">Iniciar sesión</span></p>
+    <div id="register-form" class="hidden flex flex-col gap-4">
+      <input id="reg-name" type="text" placeholder="Nombre" class="input-field">
+      <input id="reg-email" type="email" placeholder="Email" class="input-field">
+      <input id="reg-password" type="password" placeholder="Contraseña" class="input-field">
+      <button onclick="register()" class="btn-success">Registrarse</button>
+      <p class="text-sm text-center">¿Ya tienes cuenta? <span class="text-indigo-500 cursor-pointer" onclick="showLogin()">Iniciar sesión</span></p>
     </div>
   </div>
 
   <!-- Dashboard -->
-  <div id="dashboard" class="hidden">
-    <div class="dashboard-header">
-      <h2>Tus Medicamentos</h2>
-      <div class="dashboard-buttons">
-        <button onclick="openUserMenu()">Perfil</button>
-        <button onclick="logout()">Cerrar sesión</button>
+  <div id="dashboard" class="hidden w-full max-w-3xl mt-6 flex flex-col gap-6">
+
+    <div class="flex justify-between items-center">
+      <h2 class="text-2xl font-bold">Tus Medicamentos</h2>
+      <div class="flex gap-2">
+        <button onclick="openUserMenu()" class="btn-secondary">Perfil</button>
+        <button onclick="logout()" class="btn-danger">Cerrar sesión</button>
       </div>
     </div>
 
-    <!-- Formulario añadir medicamento -->
-    <div class="med-form">
-      <input id="med-name" type="text" placeholder="Nombre del medicamento">
-      <input id="med-dosis" type="text" placeholder="Dosis">
-      <input id="med-hora" type="time">
-      <button onclick="addMed()">Añadir</button>
-      <button onclick="scanReceta()">Escanear</button>
+    <div class="flex flex-wrap gap-2 items-center bg-white dark:bg-gray-700 p-4 rounded-2xl shadow-md">
+      <input id="med-name" type="text" placeholder="Medicamento" class="flex-1 input-field">
+      <input id="med-dosis" type="text" placeholder="Dosis" class="w-24 input-field">
+      <input id="med-hora" type="time" class="w-24 input-field">
+      <button onclick="addMed()" class="btn-primary">Añadir</button>
+      <button onclick="scanReceta()" class="btn-warning">Escanear</button>
     </div>
 
-    <!-- Lista de medicamentos -->
-    <div id="med-list"></div>
+    <div id="med-list" class="flex flex-col gap-2"></div>
 
-    <!-- Ranking semanal -->
-    <div class="ranking-container">
-      <h3>Ranking Semanal</h3>
+    <div class="bg-white dark:bg-gray-700 p-4 rounded-2xl shadow-inner">
+      <h3 class="font-bold text-xl mb-2">Ranking Semanal</h3>
       <div id="ranking"></div>
     </div>
   </div>
 </div>
 
-<!-- Menú de usuario modal -->
+<!-- User Menu -->
 <div id="user-menu" class="modal hidden">
   <div class="modal-content">
-    <h3>Perfil</h3>
+    <h3 class="font-bold text-2xl mb-2">Perfil</h3>
     <img id="profile-pic" src="" alt="Foto">
     <input type="file" id="profile-input">
     <input id="profile-name" type="text" placeholder="Nombre">
     <input id="profile-email" type="email" placeholder="Email" disabled>
     <input id="profile-password" type="password" placeholder="Nueva contraseña">
-    <button onclick="saveProfile()">Guardar</button>
-    <button onclick="closeUserMenu()">Cerrar</button>
+    <button onclick="saveProfile()" class="btn-success">Guardar</button>
+    <button onclick="closeUserMenu()" class="btn-secondary">Cerrar</button>
   </div>
 </div>
 
 <input type="file" id="file-input" accept="image/*" capture="environment" class="hidden">
-
 <script src="app.js" defer></script>
 </body>
 </html>
