@@ -4,76 +4,213 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>MedicApp</title>
-<link rel="stylesheet" href="style.css">
 <script src="https://cdn.jsdelivr.net/npm/tesseract.js@4.1.1/dist/tesseract.min.js"></script>
 <link rel="manifest" href="manifest.json">
+<style>
+/* --- RESET & BODY --- */
+*{box-sizing:border-box;margin:0;padding:0;}
+body{font-family:'Inter',sans-serif;background:#f3f4f6;color:#111827;transition:background 0.3s,color 0.3s;}
+@media(prefers-color-scheme:dark){body{background:#1f2937;color:#f9fafb;}}
+
+/* --- INPUTS --- */
+.input-field{padding:.75rem 1rem;border-radius:1rem;border:1px solid #d1d5db;width:100%;outline:none;transition:border-color .2s;}
+.input-field:focus{border-color:#6366f1;}
+
+/* --- BOTONES --- */
+.btn-primary{background:linear-gradient(to right,#6366f1,#a78bfa);color:white;padding:.75rem 1rem;border-radius:1rem;cursor:pointer;transition:opacity .2s;}
+.btn-primary:hover{opacity:.9;}
+.btn-success{background:linear-gradient(to right,#10b981,#34d399);color:white;padding:.75rem 1rem;border-radius:1rem;cursor:pointer;transition:opacity .2s;}
+.btn-success:hover{opacity:.9;}
+.btn-danger{background:linear-gradient(to right,#ef4444,#f87171);color:white;padding:.75rem 1rem;border-radius:1rem;cursor:pointer;transition:opacity .2s;}
+.btn-danger:hover{opacity:.9;}
+.btn-warning{background:linear-gradient(to right,#f59e0b,#facc15);color:black;padding:.75rem 1rem;border-radius:1rem;cursor:pointer;transition:opacity .2s;}
+.btn-warning:hover{opacity:.9;}
+.btn-secondary{background:#9ca3af;padding:.5rem 1rem;border-radius:1rem;cursor:pointer;}
+.btn-secondary:hover{opacity:.8;}
+
+/* --- CARD --- */
+.card{display:flex;justify-content:space-between;align-items:center;padding:1rem;border-radius:1rem;background:white;box-shadow:0 3px 6px rgba(0,0,0,.1);transition:background .2s,color .2s;}
+.card.taken{background:#10b981;color:white;}
+
+/* --- MODAL --- */
+.modal{position:fixed;top:0;left:0;right:0;bottom:0;background:rgba(0,0,0,.5);display:flex;justify-content:center;align-items:center;z-index:50;}
+.modal-content{background:white;padding:2rem;border-radius:2rem;width:90%;max-width:320px;display:flex;flex-direction:column;align-items:center;gap:.5rem;}
+.modal-content img{width:120px;height:120px;border-radius:50%;object-fit:cover;}
+
+/* --- LAYOUT --- */
+#app{display:flex;flex-direction:column;align-items:center;min-height:100vh;padding:1rem;}
+#auth,#dashboard{width:100%;max-width:480px;margin-top:2rem;background:white;dark:bg-gray-800;padding:1.5rem;border-radius:2rem;box-shadow:0 3px 10px rgba(0,0,0,.1);}
+.hidden{display:none;}
+</style>
 </head>
-<body class="bg-gray-100 dark:bg-gray-900 text-gray-900 dark:text-gray-100">
-
-<div id="app" class="flex flex-col items-center min-h-screen p-4">
-
-  <!-- Auth -->
-  <div id="auth" class="w-full max-w-md mt-10 bg-white dark:bg-gray-800 p-6 rounded-3xl shadow-xl">
-    <h1 class="text-4xl font-extrabold mb-6 text-center text-indigo-600 dark:text-indigo-400">MedicApp</h1>
-    <div id="login-form" class="flex flex-col gap-4">
-      <input id="login-email" type="email" placeholder="Email" class="input-field">
-      <input id="login-password" type="password" placeholder="Contraseña" class="input-field">
-      <button onclick="login()" class="btn-primary">Iniciar sesión</button>
-      <p class="text-sm text-center">¿No tienes cuenta? <span class="text-indigo-500 cursor-pointer" onclick="showRegister()">Regístrate</span></p>
+<body>
+<div id="app">
+  <!-- LOGIN / REGISTER -->
+  <div id="auth">
+    <div id="login-form">
+      <h1 style="text-align:center;font-size:2rem;margin-bottom:1rem;color:#6366f1;">MedicApp</h1>
+      <input id="login-email" type="email" placeholder="Email" class="input-field"><br>
+      <input id="login-password" type="password" placeholder="Contraseña" class="input-field"><br>
+      <button onclick="login()" class="btn-primary" style="width:100%;">Iniciar sesión</button>
+      <p style="text-align:center;margin-top:.5rem;">¿No tienes cuenta? <span style="color:#6366f1;cursor:pointer;" onclick="showRegister()">Regístrate</span></p>
     </div>
-
-    <div id="register-form" class="hidden flex flex-col gap-4">
-      <input id="reg-name" type="text" placeholder="Nombre" class="input-field">
-      <input id="reg-email" type="email" placeholder="Email" class="input-field">
-      <input id="reg-password" type="password" placeholder="Contraseña" class="input-field">
-      <button onclick="register()" class="btn-success">Registrarse</button>
-      <p class="text-sm text-center">¿Ya tienes cuenta? <span class="text-indigo-500 cursor-pointer" onclick="showLogin()">Iniciar sesión</span></p>
+    <div id="register-form" class="hidden">
+      <h1 style="text-align:center;font-size:2rem;margin-bottom:1rem;color:#10b981;">Registrarse</h1>
+      <input id="reg-name" type="text" placeholder="Nombre" class="input-field"><br>
+      <input id="reg-email" type="email" placeholder="Email" class="input-field"><br>
+      <input id="reg-password" type="password" placeholder="Contraseña" class="input-field"><br>
+      <button onclick="register()" class="btn-success" style="width:100%;">Registrarse</button>
+      <p style="text-align:center;margin-top:.5rem;">¿Ya tienes cuenta? <span style="color:#6366f1;cursor:pointer;" onclick="showLogin()">Iniciar sesión</span></p>
     </div>
   </div>
 
-  <!-- Dashboard -->
-  <div id="dashboard" class="hidden w-full max-w-3xl mt-6 flex flex-col gap-6">
-
-    <div class="flex justify-between items-center">
-      <h2 class="text-2xl font-bold">Tus Medicamentos</h2>
-      <div class="flex gap-2">
+  <!-- DASHBOARD -->
+  <div id="dashboard" class="hidden">
+    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:1rem;">
+      <h2 style="font-size:1.5rem;font-weight:bold;">Tus Medicamentos</h2>
+      <div style="display:flex;gap:.5rem;">
         <button onclick="openUserMenu()" class="btn-secondary">Perfil</button>
         <button onclick="logout()" class="btn-danger">Cerrar sesión</button>
       </div>
     </div>
 
-    <div class="flex flex-wrap gap-2 items-center bg-white dark:bg-gray-700 p-4 rounded-2xl shadow-md">
-      <input id="med-name" type="text" placeholder="Medicamento" class="flex-1 input-field">
-      <input id="med-dosis" type="text" placeholder="Dosis" class="w-24 input-field">
-      <input id="med-hora" type="time" class="w-24 input-field">
+    <div style="display:flex;flex-wrap:wrap;gap:.5rem;margin-bottom:1rem;">
+      <input id="med-name" type="text" placeholder="Medicamento" class="input-field" style="flex:2;">
+      <input id="med-dosis" type="text" placeholder="Dosis" class="input-field" style="flex:1;">
+      <input id="med-hora" type="time" class="input-field" style="flex:1;">
       <button onclick="addMed()" class="btn-primary">Añadir</button>
       <button onclick="scanReceta()" class="btn-warning">Escanear</button>
     </div>
 
-    <div id="med-list" class="flex flex-col gap-2"></div>
+    <div id="med-list" style="display:flex;flex-direction:column;gap:.5rem;margin-bottom:1rem;"></div>
 
-    <div class="bg-white dark:bg-gray-700 p-4 rounded-2xl shadow-inner">
-      <h3 class="font-bold text-xl mb-2">Ranking Semanal</h3>
+    <div style="background:#f9fafb;padding:1rem;border-radius:1rem;">
+      <h3 style="font-weight:bold;margin-bottom:.5rem;">Ranking Semanal</h3>
       <div id="ranking"></div>
     </div>
   </div>
 </div>
 
-<!-- User Menu -->
+<!-- USER MODAL -->
 <div id="user-menu" class="modal hidden">
   <div class="modal-content">
-    <h3 class="font-bold text-2xl mb-2">Perfil</h3>
+    <h3 style="font-weight:bold;font-size:1.5rem;margin-bottom:.5rem;">Perfil</h3>
     <img id="profile-pic" src="" alt="Foto">
     <input type="file" id="profile-input">
-    <input id="profile-name" type="text" placeholder="Nombre">
-    <input id="profile-email" type="email" placeholder="Email" disabled>
-    <input id="profile-password" type="password" placeholder="Nueva contraseña">
-    <button onclick="saveProfile()" class="btn-success">Guardar</button>
-    <button onclick="closeUserMenu()" class="btn-secondary">Cerrar</button>
+    <input id="profile-name" type="text" placeholder="Nombre" class="input-field">
+    <input id="profile-email" type="email" placeholder="Email" class="input-field" disabled>
+    <input id="profile-password" type="password" placeholder="Nueva contraseña" class="input-field">
+    <button onclick="saveProfile()" class="btn-success" style="width:100%;">Guardar</button>
+    <button onclick="closeUserMenu()" class="btn-secondary" style="width:100%;">Cerrar</button>
   </div>
 </div>
 
 <input type="file" id="file-input" accept="image/*" capture="environment" class="hidden">
-<script src="app.js" defer></script>
+
+<script>
+/* --- DATOS USUARIOS --- */
+function getUsers(){return JSON.parse(localStorage.getItem('users')||'[]');}
+function saveUsers(users){localStorage.setItem('users',JSON.stringify(users));}
+function getCurrentUser(){return JSON.parse(localStorage.getItem('currentUser'));}
+function saveCurrentUser(user){localStorage.setItem('currentUser',JSON.stringify(user));}
+
+/* --- LOGIN/REGISTER --- */
+function showRegister(){document.getElementById('login-form').classList.add('hidden');document.getElementById('register-form').classList.remove('hidden');}
+function showLogin(){document.getElementById('register-form').classList.add('hidden');document.getElementById('login-form').classList.remove('hidden');}
+function register(){
+  let name=document.getElementById('reg-name').value,email=document.getElementById('reg-email').value,pass=document.getElementById('reg-password').value;
+  if(!name||!email||!pass){alert("Completa todos los campos");return;}
+  let users=getUsers();if(users.find(u=>u.email===email)){alert("Usuario ya existe");return;}
+  let user={name,email,password:pass,medicamentos:[],bonos:0,foto:""};
+  users.push(user);saveUsers(users);alert("Usuario registrado");showLogin();
+}
+function login(){
+  let email=document.getElementById('login-email').value,pass=document.getElementById('login-password').value;
+  let user=getUsers().find(u=>u.email===email&&u.password===pass);
+  if(!user){alert("Usuario o contraseña incorrectos");return;}
+  saveCurrentUser(user);document.getElementById('auth').classList.add('hidden');document.getElementById('dashboard').classList.remove('hidden');
+  renderMeds();renderRanking();initAlarmas();
+}
+function logout(){localStorage.removeItem('currentUser');document.getElementById('dashboard').classList.add('hidden');document.getElementById('auth').classList.remove('hidden');}
+
+/* --- MEDICAMENTOS --- */
+function addMed(){
+  let name=document.getElementById('med-name').value,dosis=document.getElementById('med-dosis').value,hora=document.getElementById('med-hora').value;
+  if(!name||!hora){alert("Nombre y hora obligatorios");return;}
+  let user=getCurrentUser();user.medicamentos.push({name,dosis,hora,tomado:false});
+  saveCurrentUser(user);renderMeds();scheduleNotification({name,dosis,hora});
+}
+function renderMeds(){
+  let medList=document.getElementById('med-list');let user=getCurrentUser();medList.innerHTML="";
+  user.medicamentos.forEach((med,i)=>{
+    let card=document.createElement('div');card.className="card"+(med.tomado?" taken":"");
+    card.innerHTML=`<div><p>${med.name}</p><p>${med.dosis} - ${med.hora}</p><p>Tomado: ${med.tomado?"Sí":"No"}</p></div>
+    <button onclick="marcar(${i})">${med.tomado?"Desmarcar":"Marcar"}</button>`;
+    medList.appendChild(card);
+  });
+}
+function marcar(i){
+  let user=getCurrentUser();user.medicamentos[i].tomado=!user.medicamentos[i].tomado;
+  if(user.medicamentos[i].tomado)user.bonos=(user.bonos||0)+1;
+  saveCurrentUser(user);renderMeds();renderRanking();
+}
+
+/* --- RANKING --- */
+function renderRanking(){
+  let ranking=document.getElementById('ranking');
+  let users=getUsers().sort((a,b)=>b.bonos-(a.bonos||0)).slice(0,10);
+  ranking.innerHTML="<ol>"+users.map(u=>`<li>${u.name} - ${u.bonos||0} pts</li>`).join("")+"</ol>";
+}
+
+/* --- PERFIL --- */
+function openUserMenu(){
+  let user=getCurrentUser();
+  document.getElementById('profile-name').value=user.name;
+  document.getElementById('profile-email').value=user.email;
+  document.getElementById('profile-pic').src=user.foto||"";
+  document.getElementById('user-menu').classList.remove('hidden');
+}
+function closeUserMenu(){document.getElementById('user-menu').classList.add('hidden');}
+document.getElementById('profile-input').addEventListener('change',e=>{
+  const reader=new FileReader();
+  reader.onload=function(){document.getElementById('profile-pic').src=reader.result;}
+  reader.readAsDataURL(e.target.files[0]);
+});
+function saveProfile(){
+  let user=getCurrentUser();
+  user.name=document.getElementById('profile-name').value;
+  let pass=document.getElementById('profile-password').value;if(pass)user.password=pass;
+  user.foto=document.getElementById('profile-pic').src;
+  saveCurrentUser(user);closeUserMenu();
+}
+
+/* --- ESCANEO DE RECETAS --- */
+function scanReceta(){document.getElementById('file-input').click();}
+document.getElementById('file-input').addEventListener('change',async e=>{
+  const file=e.target.files[0];if(!file)return;
+  const worker=Tesseract.createWorker({logger:m=>console.log(m)});
+  await worker.load();await worker.loadLanguage('spa');await worker.initialize('spa');
+  const {data:{text}}=await worker.recognize(file);await worker.terminate();
+  let user=getCurrentUser();
+  user.medicamentos.push({name:text.split("\n")[0]||"Receta escaneada",dosis:"",hora:"08:00",tomado:false});
+  saveCurrentUser(user);renderMeds();alert("Receta añadida");
+});
+
+/* --- NOTIFICACIONES --- */
+if('Notification' in window)Notification.requestPermission();
+function scheduleNotification(med){
+  if(!("Notification"in window))return;
+  let now=new Date(),[h,min]=med.hora.split(":").map(Number);
+  let notifTime=new Date();notifTime.setHours(h,min,0,0);
+  if(notifTime<now)notifTime.setDate(notifTime.getDate()+1);
+  let timeout=notifTime-now;
+  setTimeout(()=>{
+    new Notification("MedicApp",{body:`Toma ${med.name} - ${med.dosis}`,icon:"https://cdn-icons-png.flaticon.com/512/2965/2965567.png"});
+    new Audio('https://actions.google.com/sounds/v1/alarms/alarm_clock.ogg').play().catch(()=>{});
+    scheduleNotification(med);
+  },timeout);
+}
+function initAlarmas(){let user=getCurrentUser();if(!user)return;user.medicamentos.forEach(m=>{if(!m.tomado)scheduleNotification(m);});}
+</script>
 </body>
 </html>
