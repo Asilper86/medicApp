@@ -31,7 +31,7 @@ body { font-family: 'Inter', sans-serif; }
     <div id="login-form">
       <input id="login-email" type="email" placeholder="Email" class="w-full p-3 mb-4 border rounded-2xl dark:bg-gray-700 dark:text-white">
       <input id="login-password" type="password" placeholder="Contraseña" class="w-full p-3 mb-4 border rounded-2xl dark:bg-gray-700 dark:text-white">
-      <button onclick="login()" class="w-full btn-gradient py-3 rounded-2xl text-lg font-semibold hover:opacity-90 transition">Iniciar sesión</button>
+      <button onclick="login()" class="w-full bg-purple-500 py-3 rounded-2xl text-lg font-semibold hover:opacity-90 transition">Iniciar sesión</button>
       <p class="mt-4 text-sm text-center">¿No tienes cuenta? <span class="text-indigo-500 cursor-pointer" onclick="showRegister()">Regístrate</span></p>
     </div>
 
@@ -114,8 +114,17 @@ function login(){
   let email=document.getElementById('login-email').value,pass=document.getElementById('login-password').value;
   let user=getUsers().find(u=>u.email===email&&u.password===pass);
   if(!user){alert("Usuario o contraseña incorrectos");return;}
-  saveCurrentUser(user);document.getElementById('auth').classList.add('hidden');document.getElementById('dashboard').classList.remove('hidden');
+  saveCurrentUser(user);
+  document.getElementById('auth').classList.add('hidden');
+  document.getElementById('dashboard').classList.remove('hidden');
   renderMeds();renderRanking();initAlarmas();
+
+  if("Notificacion" in window && Notification.permission === "granted"){
+    new Notification("MedicApp", {
+      body: "Has Iniciado sesion correctamente.",
+      icon: "https://cdn-icons-png.flaticon.com/512/2965/2965567.png"
+    })
+  }
 }
 function logout(){localStorage.removeItem('currentUser');document.getElementById('dashboard').classList.add('hidden');document.getElementById('auth').classList.remove('hidden');}
 
