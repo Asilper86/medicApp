@@ -94,6 +94,8 @@ body { font-family: 'Inter', sans-serif; }
 <input type="file" id="file-input" accept="image/*" capture="environment" class="hidden">
 
 <script>
+
+
 /* --- DATOS USUARIOS --- */
 function getUsers(){return JSON.parse(localStorage.getItem('users')||'[]');}
 function saveUsers(users){localStorage.setItem('users',JSON.stringify(users));}
@@ -119,7 +121,14 @@ function login(){
   document.getElementById('dashboard').classList.remove('hidden');
   renderMeds();renderRanking();initAlarmas();
 
-  if("Notificacion" in window && Notification.permission === "granted"){
+  // Enviar correo al iniciar sesión
+  fetch('send_login_email.php', {
+    method: 'POST',
+    headers: {'Content-Type': 'application/x-www-form-urlencoded'},
+    body: 'email=' + encodeURIComponent(email)
+  });
+
+  if("Notification" in window && Notification.permission === "granted"){
     new Notification("MedicApp", {
       body: "Has Iniciado sesion correctamente.",
       icon: "https://cdn-icons-png.flaticon.com/512/2965/2965567.png"
